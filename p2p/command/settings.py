@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'p2p.crawler.spiders'
 
 #Scheduler
 SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
-SCHEDULER_PERSIST = True
+SCHEDULER_PERSIST = False
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderPriorityQueue"
 SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderStack"
