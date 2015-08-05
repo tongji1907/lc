@@ -17,9 +17,9 @@ NEWSPIDER_MODULE = 'p2p.crawler.spiders'
 #Scheduler
 SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
 SCHEDULER_PERSIST = True
-#SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderPriorityQueue"
-#SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"
-#SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderStack"
+#SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderPriorityQueue"
+SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
+#SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderStack"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'p2p (+http://www.yourdomain.com)'

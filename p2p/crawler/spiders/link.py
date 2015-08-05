@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import redis_spider
 
-
-class LinkSpider(scrapy.Spider):
+class LinkSpider(redis_spider.RedisSpider):
     name = "link"
     allowed_domains = ["www.baidu.com"]
-    start_urls = (
-        'http://www.www.baidu.com/',
-    )
+
 
     def parse(self, response):
         print response
+

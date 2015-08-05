@@ -2,125 +2,91 @@ import os
 import json
 import logging
 from os.path import join, exists
-
+import redis
 from queuelib import PriorityQueue
 from scrapy.utils.reqser import request_to_dict, request_from_dict
 from scrapy.utils.misc import load_object
 from scrapy.utils.job import job_dir
+from redis_dupefilter import RFPDupeFilter
 
 logger = logging.getLogger(__name__)
-
+# default values
+SCHEDULER_PERSIST = False
+QUEUE_KEY = '%(spider)s:requests'
+QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
+DUPEFILTER_KEY = '%(spider)s:dupefilter'
+IDLE_BEFORE_CLOSE = 0
 
 class RedisScheduler(object):
+    """Redis-based scheduler"""
 
-    def __init__(self, dupefilter, jobdir=None, dqclass=None, mqclass=None, logunser=False, stats=None):
-        self.df = dupefilter
-        self.dqdir = self._dqdir(jobdir)
-        self.dqclass = dqclass
-        self.mqclass = mqclass
-        self.logunser = logunser
-        self.stats = stats
+    def __init__(self, server, persist, queue_key, queue_cls, dupefilter_key, idle_before_close):
+        """Initialize scheduler.
+        Parameters
+        ----------
+        server : Redis instance
+        persist : bool
+        queue_key : str
+        queue_cls : queue class
+        dupefilter_key : str
+        idle_before_close : int
+        """
+        self.server = server
+        self.persist = persist
+        self.queue_key = queue_key
+        self.queue_cls = queue_cls
+        self.dupefilter_key = dupefilter_key
+        self.idle_before_close = idle_before_close
+        self.stats = None
+
+    def __len__(self):
+        return len(self.queue)
+
+    @classmethod
+    def from_settings(cls, settings):
+        persist = settings.get('SCHEDULER_PERSIST', SCHEDULER_PERSIST)
+        queue_key = settings.get('SCHEDULER_QUEUE_KEY', QUEUE_KEY)
+        queue_cls = load_object(settings.get('SCHEDULER_QUEUE_CLASS', QUEUE_CLASS))
+        dupefilter_key = settings.get('DUPEFILTER_KEY', DUPEFILTER_KEY)
+        idle_before_close = settings.get('SCHEDULER_IDLE_BEFORE_CLOSE', IDLE_BEFORE_CLOSE)
+        server =  redis.Redis('120.25.216.93','6379')
+        return cls(server, persist, queue_key, queue_cls, dupefilter_key, idle_before_close)
 
     @classmethod
     def from_crawler(cls, crawler):
-        settings = crawler.settings
-        dupefilter_cls = load_object(settings['DUPEFILTER_CLASS'])
-        dupefilter = dupefilter_cls.from_settings(settings)
-        dqclass = load_object(settings['SCHEDULER_DISK_QUEUE'])
-        mqclass = load_object(settings['SCHEDULER_MEMORY_QUEUE'])
-        logunser = settings.getbool('LOG_UNSERIALIZABLE_REQUESTS')
-        return cls(dupefilter, job_dir(settings), dqclass, mqclass, logunser, crawler.stats)
-
-    def has_pending_requests(self):
-        return len(self) > 0
+        instance = cls.from_settings(crawler.settings)
+        # FIXME: for now, stats are only supported from this constructor
+        instance.stats = crawler.stats
+        return instance
 
     def open(self, spider):
         self.spider = spider
-        self.mqs = PriorityQueue(self._newmq)
-        self.dqs = self._dq() if self.dqdir else None
-        return self.df.open()
+        self.queue = self.queue_cls(self.server, spider, self.queue_key)
+        self.df = RFPDupeFilter(self.server, self.dupefilter_key % {'spider': spider.name},10)
+        if self.idle_before_close < 0:
+            self.idle_before_close = 0
+        # notice if there are requests already in the queue to resume the crawl
+        if len(self.queue):
+            spider.log("Resuming crawl (%d requests scheduled)" % len(self.queue))
 
     def close(self, reason):
-        if self.dqs:
-            prios = self.dqs.close()
-            with open(join(self.dqdir, 'active.json'), 'w') as f:
-                json.dump(prios, f)
-        return self.df.close(reason)
+        if not self.persist:
+            self.df.clear()
+            self.queue.clear()
 
     def enqueue_request(self, request):
         if not request.dont_filter and self.df.request_seen(request):
-            self.df.log(request, self.spider)
-            return False
-        dqok = self._dqpush(request)
-        if dqok:
-            self.stats.inc_value('scheduler/enqueued/disk', spider=self.spider)
-        else:
-            self._mqpush(request)
-            self.stats.inc_value('scheduler/enqueued/memory', spider=self.spider)
-        self.stats.inc_value('scheduler/enqueued', spider=self.spider)
-        return True
+            return
+        if self.stats:
+            self.stats.inc_value('scheduler/enqueued/redis', spider=self.spider)
+        self.queue.push(request)
 
     def next_request(self):
-        request = self.mqs.pop()
-        if request:
-            self.stats.inc_value('scheduler/dequeued/memory', spider=self.spider)
-        else:
-            request = self._dqpop()
-            if request:
-                self.stats.inc_value('scheduler/dequeued/disk', spider=self.spider)
-        if request:
-            self.stats.inc_value('scheduler/dequeued', spider=self.spider)
+        block_pop_timeout = self.idle_before_close
+        request = self.queue.pop(block_pop_timeout)
+        if request and self.stats:
+            self.stats.inc_value('scheduler/dequeued/redis', spider=self.spider)
         return request
 
-    def __len__(self):
-        return len(self.dqs) + len(self.mqs) if self.dqs else len(self.mqs)
-
-    def _dqpush(self, request):
-        if self.dqs is None:
-            return
-        try:
-            reqd = request_to_dict(request, self.spider)
-            self.dqs.push(reqd, -request.priority)
-        except ValueError as e: # non serializable request
-            if self.logunser:
-                logger.error("Unable to serialize request: %(request)s - reason: %(reason)s",
-                             {'request': request, 'reason': e},
-                             exc_info=True, extra={'spider': self.spider})
-            return
-        else:
-            return True
-
-    def _mqpush(self, request):
-        self.mqs.push(request, -request.priority)
-
-    def _dqpop(self):
-        if self.dqs:
-            d = self.dqs.pop()
-            if d:
-                return request_from_dict(d, self.spider)
-
-    def _newmq(self, priority):
-        return self.mqclass()
-
-    def _newdq(self, priority):
-        return self.dqclass(join(self.dqdir, 'p%s' % priority))
-
-    def _dq(self):
-        activef = join(self.dqdir, 'active.json')
-        if exists(activef):
-            with open(activef) as f:
-                prios = json.load(f)
-        else:
-            prios = ()
-        q = PriorityQueue(self._newdq, startprios=prios)
-        if q:
-            logger.info("Resuming crawl (%(queuesize)d requests scheduled)",
-                        {'queuesize': len(q)}, extra={'spider': self.spider})
-        return q
-
-    def _dqdir(self, jobdir):
-        if jobdir:
-            dqdir = join(jobdir, 'requests.queue')
-            if not exists(dqdir):
-                os.makedirs(dqdir)
-            return dqdir
+    def has_pending_requests(self):
+        return len(self) > 0

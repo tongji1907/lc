@@ -18,4 +18,6 @@ process = CrawlerProcess(settings)
 process.crawl(LinkSpider)
 
 process.start()
-#process.stop()
+
+
+process.stop()
