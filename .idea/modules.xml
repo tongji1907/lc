@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/lc.iml" filepath="$PROJECT_DIR$/.idea/lc.iml" />
+      <module fileurl="file://$USER_HOME$/Downloads/scrapy-cluster-master/.idea/scrapy-cluster-master.iml" filepath="$USER_HOME$/Downloads/scrapy-cluster-master/.idea/scrapy-cluster-master.iml" />
+      <module fileurl="file://$USER_HOME$/Downloads/scrapy-master/.idea/scrapy-master.iml" filepath="$USER_HOME$/Downloads/scrapy-master/.idea/scrapy-master.iml" />
     </modules>
   </component>
 </project>

@@ -61,9 +61,9 @@ SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+    'p2p.crawler.extensions.kafka_controller.KafkaController': 500,
+}
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
