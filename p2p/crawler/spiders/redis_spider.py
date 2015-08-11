@@ -20,7 +20,9 @@ class RedisMixin(object):
         # that's when we will schedule new requests from redis queue
         self.crawler.signals.connect(self.spider_idle, signal=signals.spider_idle)
         self.crawler.signals.connect(self.item_scraped, signal=signals.item_scraped)
+        #self.crawler.signals.connect(self.spider_closed, signal=signals.spider_closed)
         self.log("Reading URLs from redis list '%s'" % self.redis_key)
+        self.paused = False
 
     def next_request(self):
         """Returns a request to be scheduled or none."""
@@ -42,13 +44,20 @@ class RedisMixin(object):
 
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
-        self.schedule_next_request()
+        if self.paused==False:
+            self.schedule_next_request()
         raise DontCloseSpider
 
     def item_scraped(self, *args, **kwargs):
         """Avoids waiting for the spider to  idle before scheduling the next request"""
         self.schedule_next_request()
 
+
+    def spider_pause(self):
+        self.paused = True
+
+    def spider_resume(self):
+        self.paused = False
 
 class RedisSpider(RedisMixin, Spider):
     """Spider that reads urls from redis queue when idle."""

@@ -28,5 +28,15 @@ class KafkaController(object):
         None
 
     def spiderIdle(self, spider):
-        print "OK 123"
+       consumer = SimpleConsumer(self.kafka_conn,"test","commands")
+       for msg in consumer.get_messages():
+            print msg.message.value
+            if   msg.message.value == spider.name+'_stop':
+                print 'stop'
+                spider.spider_pause()
+
+            if msg.message.value == spider.name+'_start':
+                #self.crawler.engine.scraper.open_spider(spider)
+                spider.spider_resume()
+
 
