@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from scrapy.crawler import CrawlerProcess
 #from p2p.crawler.spiders.link import LinkSpider
 #from p2p.crawler.spiders.link2 import Link2Spider
