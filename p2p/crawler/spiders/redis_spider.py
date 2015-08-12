@@ -1,5 +1,6 @@
 from scrapy import Spider, signals
 from scrapy.exceptions import DontCloseSpider
+from scrapy.exceptions import CloseSpider
 import  redis
 
 
@@ -44,8 +45,8 @@ class RedisMixin(object):
 
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
-        if self.paused==False:
-            self.schedule_next_request()
+        #if self.paused==False:
+        self.schedule_next_request()
         raise DontCloseSpider
 
     def item_scraped(self, *args, **kwargs):

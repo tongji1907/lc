@@ -8,7 +8,7 @@ from scrapy.utils.project import get_project_settings
 import sys
 import os
 from scrapy.utils.misc import load_object
-
+import logging
 
 
 settings = Settings()
@@ -29,4 +29,4 @@ process.crawl(spider2_cls)
 process.start()
 
 
-#process.stop()
+process.stop()
