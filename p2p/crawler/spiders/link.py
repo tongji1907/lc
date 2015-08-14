@@ -6,14 +6,9 @@ class LinkSpider(redis_spider.RedisSpider):
     name = "link"
     allowed_domains = ["www.baidu.com"]
 
-    start_urls = [
-       "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/",
-    "http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/"]
-
-
     def parse(self, response):
         if self.paused:
             print 'close spider link'
             raise CloseSpider(reason='API usage exceeded')
-        print response.body
+        print response
 

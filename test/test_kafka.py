@@ -15,7 +15,7 @@ kafka = KafkaClient("120.25.216.93:9092")
 
 producer = SimpleProducer(kafka,async=False)
 try:
-    producer.send_messages("commands", "link_stop")
+    producer.send_messages("commands", "link_start")
 except:
     None
     #time.sleep(1)

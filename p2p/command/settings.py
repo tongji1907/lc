@@ -15,10 +15,10 @@ SPIDER_MODULES = ['p2p.crawler.spiders']
 NEWSPIDER_MODULE = 'p2p.crawler.spiders'
 
 #Scheduler
-SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
-SCHEDULER_PERSIST = False
+#SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
+#SCHEDULER_PERSIST = False
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderPriorityQueue"
-SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
+#SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderStack"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -61,9 +61,9 @@ SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-EXTENSIONS = {
-    'p2p.crawler.extensions.kafka_controller.KafkaController': 500,
-}
+#EXTENSIONS = {
+#    'p2p.crawler.extensions.kafka_controller.KafkaController': 500,
+#}
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html

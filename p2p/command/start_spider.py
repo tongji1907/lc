@@ -20,11 +20,12 @@ process = CrawlerProcess(settings)
 
 linkSpider = 'p2p.crawler.spiders.link.LinkSpider'
 linkSpider2 = 'p2p.crawler.spiders.link2.Link2Spider'
+
 spider_cls = load_object(linkSpider)
 spider2_cls = load_object(linkSpider2)
 process.crawl(spider_cls)
 
-process.crawl(spider2_cls)
+#process.crawl(spider2_cls)
 
 process.start()
 
