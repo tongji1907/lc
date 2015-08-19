@@ -9,6 +9,7 @@ import sys
 import os
 from scrapy.utils.misc import load_object
 import logging
+from sqlalchemy import *
 
 
 settings = Settings()
@@ -25,9 +26,9 @@ spider_cls = load_object(linkSpider)
 spider2_cls = load_object(linkSpider2)
 process.crawl(spider_cls)
 
-#process.crawl(spider2_cls)
+process.crawl(spider2_cls)
 
 process.start()
 
 
-process.stop()
+#process.stop()
