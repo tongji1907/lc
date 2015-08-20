@@ -15,10 +15,10 @@ SPIDER_MODULES = ['p2p.crawler.spiders']
 NEWSPIDER_MODULE = 'p2p.crawler.spiders'
 
 #Scheduler
-#SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
+SCHEDULER = "p2p.crawler.redis_scheduler.RedisScheduler"
 #SCHEDULER_PERSIST = False
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderPriorityQueue"
-#SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
+SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderQueue"
 #SCHEDULER_QUEUE_CLASS = "p2p.crawler.queue.SpiderStack"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
