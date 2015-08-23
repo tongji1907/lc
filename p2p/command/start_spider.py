@@ -26,7 +26,7 @@ spider_cls = load_object(linkSpider)
 spider2_cls = load_object(linkSpider2)
 process.crawl(spider_cls)
 
-process.crawl(spider2_cls)
+#process.crawl(spider2_cls)
 
 process.start()
 
