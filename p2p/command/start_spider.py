@@ -9,6 +9,7 @@ import sys
 import os
 from scrapy.utils.misc import load_object
 import logging
+from sqlalchemy import *
 
 
 settings = Settings()
@@ -30,4 +31,4 @@ process.crawl(spider_cls)
 process.start()
 
 
-process.stop()
+#process.stop()

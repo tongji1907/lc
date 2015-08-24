@@ -1,6 +1,8 @@
 from scrapy import Spider, signals
 from scrapy.exceptions import DontCloseSpider
 from scrapy.exceptions import CloseSpider
+from scrapy.http.request import Request
+import pickle
 import  redis
 
 
@@ -35,7 +37,10 @@ class RedisMixin(object):
             url = self.server.lpop(self.redis_key)
 
         if url:
-            return self.make_requests_from_url(url)
+            t =pickle.loads(url)
+            print t['cookies']
+            return Request(t['url'],cookies=eval(t['cookies']),dont_filter=True)
+            #return self.make_requests_from_url(t['url'])
 
     def schedule_next_request(self):
         """Schedules a request if available"""
