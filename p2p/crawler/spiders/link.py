@@ -6,13 +6,13 @@ from scrapy.http.request import Request
 
 class LinkSpider(redis_spider.RedisSpider):
     name = "link"
-    allowed_domains = ["www.baidu.com"]
+    #allowed_domains = ["www.baidu.com"]
 
     def parse(self, response):
         if self.paused:
             print 'close spider link'
             raise CloseSpider(reason='API usage exceeded')
-        print response.url
+        #print response.url
 
 
 

@@ -37,11 +37,13 @@ spider_cls = load_object(linkSpider)
 spider2_cls = load_object(linkSpider2)
 process.crawl(spider_cls)
 
-process.crawl(spider2_cls)
+#process.crawl(spider2_cls)
 
 engines = []
+crawlers = []
 for crawler in process.crawlers:
     engines.append(crawler.engine)
+    crawlers.append(crawler)
 
 
 '''
@@ -54,15 +56,24 @@ crawler.engine.open_spider(spider2_cls)
 
 '''
 _start_crawler_thread()
-i =0
-while true:
-    time.sleep(15)
-    if(i==0):
-        print 'close link'
-        engines[0].close_spider(spider_cls,'error')
-    i=i+1
 
+while 1:
+    try:
+        line = sys.stdin.readline()
+    except KeyboardInterrupt:
+        break
 
+    if not line:
+        break
+
+    if line == 'stop\n':
+        print 'close link spider'
+        #engines[0].close_spider(spider_cls)
+        crawlers[0].stop()
+    elif line=='start\n':
+        print 'start link spider'
+        #engines[0].open_spider(spider_cls)
+        crawlers[0].crawl()
 #process.crawl(spider_cls)
 
 #process.crawl(spider2_cls)

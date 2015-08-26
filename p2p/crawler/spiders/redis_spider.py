@@ -38,7 +38,7 @@ class RedisMixin(object):
 
         if url:
             t =pickle.loads(url)
-            print t['cookies']
+            #print t['cookies']
             return Request(t['url'],cookies=eval(t['cookies']),dont_filter=True)
             #return self.make_requests_from_url(t['url'])
 
