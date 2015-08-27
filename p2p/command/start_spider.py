@@ -68,12 +68,19 @@ while 1:
 
     if line == 'stop\n':
         print 'close link spider'
+        engines[0].pause()
         #engines[0].close_spider(spider_cls)
-        crawlers[0].stop()
+        #crawlers[0].stop()
     elif line=='start\n':
         print 'start link spider'
+        engines[0].unpause()
         #engines[0].open_spider(spider_cls)
-        crawlers[0].crawl()
+        #crawlers[0].crawl()
+    elif line=='reload\n':
+        print 'reload spider'
+        engines[0].pause()
+        engines[0].spider = load_object(linkSpider)
+        engines[0].unpause()
 #process.crawl(spider_cls)
 
 #process.crawl(spider2_cls)

@@ -51,7 +51,8 @@ class RedisMixin(object):
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
         #if self.paused==False:
-        self.schedule_next_request()
+        if not self.crawler.engine.paused:
+            self.schedule_next_request()
         raise DontCloseSpider
 
     def item_scraped(self, *args, **kwargs):

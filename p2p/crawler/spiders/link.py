@@ -12,7 +12,7 @@ class LinkSpider(redis_spider.RedisSpider):
         if self.paused:
             print 'close spider link'
             raise CloseSpider(reason='API usage exceeded')
-        #print response.url
+        print response.url
 
 
 
